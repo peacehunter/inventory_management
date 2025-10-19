@@ -62,9 +62,12 @@ export function SellItemDialog({
   
   useEffect(() => {
     if (state.success) {
+      // Use values returned from the server (state.success.sale or similar), fallback to previous logic if not present
+      const soldQuantity = state.success.quantity ?? state.success.sale?.quantity ?? formRef.current?.quantity.value;
+      const soldName = state.success.name ?? state.success.sale?.itemName ?? item?.name;
       toast({
         title: 'Sale Recorded!',
-        description: `Sold ${formRef.current?.quantity.value} of ${item?.name}.`,
+        description: `Sold ${soldQuantity} of ${soldName}.`,
       });
       onOpenChange(false);
     } else if (state.errors) {

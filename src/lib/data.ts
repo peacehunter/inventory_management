@@ -56,21 +56,38 @@ export async function deleteItem(id: string): Promise<void> {
 
 export async function getSales(): Promise<Sale[]> {
   const result = await pool.query('SELECT * FROM sales ORDER BY date DESC');
-  return result.rows;
+  // Explicitly map itemName; provide fallback if missing, and log if undefined for diagnostics
+  return result.rows.map((r: any, i: number) => {
+    if (!r.itemname && !r.itemName) {
+      // Only log if in dev, avoids polluting logs in prod
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Sale row missing itemName at index ${i}:`, r);
+      }
+    }
+    return {
+      ...r,
+      itemName: r.itemname ?? r.itemName ?? 'Unknown Item',
+      quantity: Number(r.quantity),
+      pricePerItem: Number(r.priceperitem ?? r.pricePerItem),
+      totalPrice: Number(r.totalprice ?? r.totalPrice),
+      date: r.date?.toISOString?.() ?? r.date // normalize if not string
+    };
+  });
 }
 
 export async function recordSale(itemId: string, quantitySold: number): Promise<Sale | null> {
   const itemResult = await pool.query('SELECT * FROM items WHERE id = $1', [itemId]);
   const item = itemResult.rows[0];
-  if (!item || item.quantity < quantitySold) {
+  if (!item || Number(item.quantity) < quantitySold) {
     return null;
   }
   // Update item quantity
   await pool.query('UPDATE items SET quantity = quantity - $1 WHERE id = $2', [quantitySold, itemId]);
 
+  const sellingPrice = Number(item.sellingprice ?? item.sellingPrice);
   const newSale = await pool.query(
     'INSERT INTO sales (itemId, itemName, quantity, pricePerItem, totalPrice, date) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *',
-    [itemId, item.name, quantitySold, item.sellingPrice, item.sellingPrice * quantitySold]
+    [itemId, item.name, quantitySold, sellingPrice, sellingPrice * quantitySold]
   );
   return newSale.rows[0];
 }

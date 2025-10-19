@@ -55,9 +55,9 @@ export function SalesHistoryTable({ sales }: { sales: Sale[] }) {
                     <TableRow key={sale.id}>
                     <TableCell className="font-medium">{sale.itemName}</TableCell>
                     <TableCell className="text-right">{sale.quantity}</TableCell>
-                    <TableCell className="text-right">${sale.pricePerItem.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{typeof sale.pricePerItem === 'number' ? `$${sale.pricePerItem.toFixed(2)}` : '-'}</TableCell>
                     <TableCell className="text-right">
-                        <Badge variant="secondary">${sale.totalPrice.toFixed(2)}</Badge>
+                        <Badge variant="secondary">{typeof sale.totalPrice === 'number' ? `$${sale.totalPrice.toFixed(2)}` : '-'}</Badge>
                     </TableCell>
                     <TableCell className="text-right">{new Date(sale.date).toLocaleDateString()}</TableCell>
                     </TableRow>

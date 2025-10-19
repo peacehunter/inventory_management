@@ -41,6 +41,9 @@ type ItemCardProps = {
 
 export function ItemCard({ item, onSell }: ItemCardProps) {
   const isLowStock = item.quantity <= item.lowStockThreshold;
+  // Return an <img> tag for API-based/proxied images, <Image> for static/remote whitelisted
+  const itemImgUrl = item.imageUrl && item.imageUrl.length > 0 ? item.imageUrl : `/api/item-image?name=${encodeURIComponent(item.name)}`;
+  const isApiImg = itemImgUrl.startsWith('/api/item-image');
 
   return (
     <Card className={cn('flex flex-col transition-all hover:shadow-lg', isLowStock && 'border-destructive/50 ring-2 ring-destructive/20')}>
@@ -89,13 +92,25 @@ export function ItemCard({ item, onSell }: ItemCardProps) {
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="relative aspect-[4/3] w-full rounded-md overflow-hidden mb-4">
-            <Image 
-                src={item.imageUrl && item.imageUrl.trim() !== "" ? item.imageUrl : "https://images.unsplash.com/photo-1613574203646-ffdae46ce3e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9kdWN0JTIwYm94fGVufDB8fHx8MTc2MDczMjM4N3ww&ixlib=rb-4.1.0&q=80&w=1080"}
+            {isApiImg ? (
+              <img 
+                src={itemImgUrl}
                 alt={item.name}
-                fill
-                className="object-cover"
-                data-ai-hint={item.imageHint}
-            />
+                width={400} 
+                height={300} 
+                style={{ objectFit: 'cover', width: '100%', height: 180, borderRadius: 8 }}
+                onError={e => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }}
+                loading="lazy"
+              />
+            ) : (
+              <Image
+                src={itemImgUrl}
+                alt={item.name}
+                width={400}
+                height={300}
+                className="rounded-md object-cover w-full h-40"
+              />
+            )}
         </div>
 
         <div className="flex justify-between items-center text-sm text-muted-foreground">
@@ -108,7 +123,6 @@ export function ItemCard({ item, onSell }: ItemCardProps) {
                 <span>{item.quantity} in stock</span>
             </div>
         </div>
-
       </CardContent>
       <CardFooter className="flex flex-col items-stretch gap-2">
         {isLowStock && (
@@ -125,3 +139,4 @@ export function ItemCard({ item, onSell }: ItemCardProps) {
     </Card>
   );
 }
+// Remove second ItemCard export

@@ -39,7 +39,14 @@ export function InventoryClient({ items }: { items: Item[] }) {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                  <ItemCard item={item} onSell={setItemToSell} />
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    onSell={(itemToSell) => {
+                      setItemToSell(null); // Reset dialog completely before opening again
+                      setTimeout(() => setItemToSell(itemToSell), 0);
+                    }}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -58,6 +65,7 @@ export function InventoryClient({ items }: { items: Item[] }) {
 
       <ItemForm open={isAddFormOpen} onOpenChange={setAddFormOpen} />
       <SellItemDialog
+        key={itemToSell ? `${itemToSell.id}-${itemToSell.quantity}` : 'closed'}
         item={itemToSell}
         open={!!itemToSell}
         onOpenChange={(isOpen) => !isOpen && setItemToSell(null)}
