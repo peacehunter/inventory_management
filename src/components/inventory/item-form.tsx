@@ -44,8 +44,23 @@ function SubmitButton() {
   );
 }
 
+type ItemFormActionState =
+  | { success: true; errors?: undefined }
+  | { success?: false | undefined; errors: Record<string, string[]> };
+
+const addItemActionAdapter = async (
+  prevState: ItemFormActionState,
+  formData: FormData
+): Promise<ItemFormActionState> => {
+  const res = await addItemAction(prevState, formData);
+  if (res.success === true) {
+    return { success: true };
+  }
+  return { errors: res.errors ?? {} };
+};
+
 export function ItemForm({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
-  const [state, formAction] = useActionState(addItemAction, { errors: {} });
+  const [state, formAction] = useActionState<ItemFormActionState, FormData>(addItemActionAdapter, { errors: {} });
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
@@ -67,7 +82,15 @@ export function ItemForm({ open, onOpenChange }: { open: boolean, onOpenChange: 
     }
   }, [state.success, onOpenChange, toast]);
   
-  const allErrors = { ...errors, ...state.errors };
+  const allErrors = {
+    name: errors?.name ? (errors.name.message ? [errors.name.message] : []) : state.errors?.name,
+    description: errors?.description ? (errors.description.message ? [errors.description.message] : []) : state.errors?.description,
+    purchasePrice: errors?.purchasePrice ? (errors.purchasePrice.message ? [errors.purchasePrice.message] : []) : state.errors?.purchasePrice,
+    sellingPrice: errors?.sellingPrice ? (errors.sellingPrice.message ? [errors.sellingPrice.message] : []) : state.errors?.sellingPrice,
+    quantity: errors?.quantity ? (errors.quantity.message ? [errors.quantity.message] : []) : state.errors?.quantity,
+    lowStockThreshold: errors?.lowStockThreshold ? (errors.lowStockThreshold.message ? [errors.lowStockThreshold.message] : []) : state.errors?.lowStockThreshold,
+    _server: state.errors?._server,
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

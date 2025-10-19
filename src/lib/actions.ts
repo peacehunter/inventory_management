@@ -67,7 +67,7 @@ export async function sellItemAction(prevState: any, formData: FormData) {
         }
         revalidatePath('/');
         revalidatePath('/reports');
-        return { success: { quantity, name: result.name ?? result.itemName ?? "Item" } };
+        return { success: { quantity, name: result.itemName ?? "Item" } };
     } catch (error) {
         return { errors: { _server: ['Failed to record sale.'] } };
     }

@@ -62,14 +62,16 @@ export function SellItemDialog({
   
   useEffect(() => {
     if (state.success) {
-      // Use values returned from the server (state.success.sale or similar), fallback to previous logic if not present
-      const soldQuantity = state.success.quantity ?? state.success.sale?.quantity ?? formRef.current?.quantity.value;
-      const soldName = state.success.name ?? state.success.sale?.itemName ?? item?.name;
+      // Use values returned from the server (state.success.quantity or fallback to previous logic)
+      const soldQuantity = state.success.quantity ?? formRef.current?.quantity.value;
+      const soldName = state.success.name ?? item?.name;
       toast({
         title: 'Sale Recorded!',
-        description: `Sold ${soldQuantity} of ${soldName}.`,
+        description: `${soldQuantity} units of ${soldName} sold.`,
       });
       onOpenChange(false);
+      formRef.current?.reset();
+      return;
     } else if (state.errors) {
        Object.entries(state.errors).forEach(([key, value]) => {
         if (key === 'quantity' && value) {
@@ -110,7 +112,10 @@ export function SellItemDialog({
                   className={cn(allErrors.quantity && 'border-destructive')}
                 />
                  {allErrors?.quantity && <p className="text-destructive text-sm mt-1">{Array.isArray(allErrors.quantity) ? allErrors.quantity[0] : allErrors.quantity.message}</p>}
-                 {allErrors?._server && <p className="text-destructive text-sm mt-1">{allErrors._server[0]}</p>}
+                 {/* Only display server error if the property exists on allErrors */}
+                 {'_server' in allErrors && allErrors._server ? (
+                   <p className="text-destructive text-sm mt-1">{allErrors._server[0]}</p>
+                 ) : null}
               </div>
             </div>
           </div>
