@@ -90,10 +90,10 @@ export function ItemCard({ item, onSell }: ItemCardProps) {
       <CardContent className="flex-grow">
         <div className="relative aspect-[4/3] w-full rounded-md overflow-hidden mb-4">
             <Image 
-                src={item.imageUrl} 
-                alt={item.name} 
-                fill 
-                className="object-cover" 
+                src={item.imageUrl && item.imageUrl.trim() !== "" ? item.imageUrl : "https://images.unsplash.com/photo-1613574203646-ffdae46ce3e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwcm9kdWN0JTIwYm94fGVufDB8fHx8MTc2MDczMjM4N3ww&ixlib=rb-4.1.0&q=80&w=1080"}
+                alt={item.name}
+                fill
+                className="object-cover"
                 data-ai-hint={item.imageHint}
             />
         </div>
@@ -101,7 +101,7 @@ export function ItemCard({ item, onSell }: ItemCardProps) {
         <div className="flex justify-between items-center text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-primary" />
-                <span>Selling at ${item.sellingPrice.toFixed(2)}</span>
+                <span>Selling at {item.sellingPrice ? `$${item.sellingPrice}` : 'N/A'}</span>
             </div>
             <div className="flex items-center gap-2">
                 <Package className="h-4 w-4 text-primary" />
